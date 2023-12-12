@@ -2,8 +2,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from scripts.clean_training import files_in_dir
-from scripts.to_csv import csv_training_dir
+from clean_training import files_in_dir
+from to_csv import csv_training_dir
 
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     unique_users = np.unique(unique_users)
     unique_movies = np.unique(unique_movies)
-    users_df = pd.DataFrame({'user_id': unique_users})
+    users_df = pd.DataFrame({'user_id': unique_users, 'shifted_user': np.arange(1, len(unique_users) + 1)})
     movies_df = pd.DataFrame({'movie_id': unique_movies})
 
     users_df.to_csv('data/csv/training_unique_users.csv', index = False)

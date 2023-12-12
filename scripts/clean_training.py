@@ -1,6 +1,6 @@
 import os
 import gc
-from scripts.to_chunks import load_ratings, split_into_chunks
+from to_chunks import load_ratings, split_into_chunks
 
 dir_name = 'Netflix'
 chunk_dir = 'data/full'

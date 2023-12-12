@@ -1,7 +1,7 @@
 from typing import List
 import os
-from scripts.to_chunks import load_ratings
-from scripts.clean_training import files_in_dir, training_dir, probe_dir
+from to_chunks import load_ratings
+from clean_training import files_in_dir, training_dir, probe_dir
 
 csv_training_dir = 'data/csv/training'
 csv_probe_dir = 'data/csv/probe'
