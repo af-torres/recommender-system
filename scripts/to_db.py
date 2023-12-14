@@ -1,9 +1,9 @@
 import psycopg
 import pandas as pd
 
-from clean_training import files_in_dir_v1
-from to_csv import csv_training_dir
-from shift_ids import users_shift_key, ratings_key, movies_shift_key
+from .clean_training import files_in_dir_v1
+from .to_csv import csv_training_dir
+from .shift_ids import users_shift_key, ratings_key, movies_shift_key
 
 connection_str = (
     "postgresql://postgres:mysecretpassword@localhost:5432/postgres"

@@ -2,8 +2,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from clean_training import files_in_dir
-from to_csv import csv_training_dir
+from .clean_training import files_in_dir
+from .to_csv import csv_training_dir
 
 
 if __name__ == '__main__':

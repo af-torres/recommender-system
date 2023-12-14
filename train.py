@@ -62,44 +62,61 @@ class lm:
         self.rdf = rdf
 
 
+def alsStep(
+        idKey: str,
+        yKey: str,
+        generator: generator.Generator,
+        betasVector: np.ndarray, # fitted values during als step
+        latentVector: np.ndarray, # latent values used as regression predictors
+        k = 3,
+    ) -> Tuple[np.ndarray, float]:
+    rss = 0
+    size = 0
+
+    for ids, batch in generator:
+        log.debug("%s batch from id %s to %s", idKey, ids[0], ids[-1])
+        log.debug("total batch size %s", batch.shape)
+        for id in batch:
+            xY = batch.loc[[id], [idKey, yKey]]
+            if len(xY) < k: # if total data < k, the matrix is invertible
+                continue
+
+            x = latentVector[xY[idKey].to_numpy(), :]
+            y = xY[yKey].to_numpy()
+
+            model = lm(x, y)
+
+            betasVector[id, :] = model.betas
+
+            rss += np.sum(np.dot(model.residual.T, model.residual))
+            size += x.shape[0]
+    
+    return (betasVector, np.sqrt(rss / size))
+
+
 def train(
         users: pd.DataFrame,
         movies: pd.DataFrame,
         uGenerator: generator.Generator,
         vGenerator:generator.Generator,
+        maxIter = 10,
+        tol = 0.001,
         k = 3
     ) -> Tuple[np.ndarray, np.ndarray]:
     u, v = init_weights(users, movies, k)
 
-    for movies, batch in vGenerator:
-        log.debug("movies batch from id %s to %s", movies[0], movies[-1])
-        log.debug("total batch size %s", batch.shape)
-        for m_id in movies:
-            users: np.ndarray = batch.loc[[m_id], users_shift_key].to_numpy()
-            if len(users) < k:
-                continue # if users < k, the matrix is invertible
+    curr = 0
+    prevRmse = 0
+    while True:
+        curr += 1
 
-            x = u[users, :]
-            y: np.ndarray = batch.loc[[m_id], rating_key].to_numpy()
+        v, _ = alsStep(users_shift_key, rating_key, vGenerator, v, u, k)
+        u, rmse = alsStep(movies_shift_key, rating_key, uGenerator, u, v, k)
 
-            model = lm(x, y)
+        if abs(prevRmse - rmse) < tol  or curr == maxIter:
+            break
 
-            v[m_id, :] = model.betas
-
-    for users, batch in uGenerator:
-        log.debug("users batch from id %s to %s", users[0], users[-1])
-        log.debug("total batch size %s", batch.shape)
-        for u_id in users:
-            movies = batch.loc[[u_id], movies_shift_key].to_numpy()
-            if len(movies) < k: # if movies < k, the matrix is invertible
-                continue
-
-            x = v[movies, :]
-            y = batch.loc[[u_id], rating_key].to_numpy()
-
-            model = lm(x, y)
-
-            u[u_id, :] = model.betas
+        prevRmse = rmse
 
     return (u, v)
 
@@ -116,7 +133,7 @@ if __name__ == '__main__':
         log.info("start training")
         start = time.perf_counter()
         u, v = train(users, movies, uGenerator, vGenerator)
-        log.info("Total training time of one full ALS step: %s", time.perf_counter() - start)
+        log.info("total training time of one full ALS step: %s", time.perf_counter() - start)
         log.info("training completed. saving weights")
         
         np.save("weights_u.npy", u)

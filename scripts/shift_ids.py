@@ -1,7 +1,7 @@
 import pandas as pd
 
-from clean_training import files_in_dir_v1
-from to_csv import csv_training_dir, csv_probe_dir
+from .clean_training import files_in_dir_v1
+from .to_csv import csv_training_dir, csv_probe_dir
 
 users_csv = 'data/csv/training_unique_users.csv'
 movies_csv = 'data/csv/training_unique_movies.csv'

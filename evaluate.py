@@ -28,7 +28,7 @@ if __name__ == '__main__':
             movies = batch_df['movie_id'].to_numpy()
             ratings = batch_df['rating'].to_numpy()
 
-            y_hat = np.sum(np.dot(u[users, :], v[movies, :].T), axis=1)
+            y_hat = np.sum(u[users, :] * v[movies, :], axis=1)
 
             e = y_hat - ratings
             sse += np.sum(np.dot(e.T, e))
